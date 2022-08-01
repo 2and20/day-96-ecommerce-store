@@ -1,0 +1,7 @@
+    {# if not logged_in #}
+    {# current_user.is_authenticated #}
+        <a href="{{url_for('login')}}">Login</a>
+        <a href="{{url_for('register')}}">Register</a>
+    {# else #}
+        <a href="#">Logout</a>
+    {# endif #}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages() %}
+ {% if messages %}
+  <ul class=flashes>
+   {% for message in messages %}
+     <li>{{ message }}</li>
+   {% endfor %}
+  </ul>
+  {% endif %}
+{% endwith %}
+
+<div class="container form-group" style="width:60%">
+ <h3><span style="text-align:center">Register</span></h3>
+<!--    <div class="row d-flex justify-content-center align-items-center form-group">-->
+{{ wtf.quick_form(form, novalidate=True,  button_map={'submit':'primary'}) }}
+
+<!--        {{ form.submit }}-->
+<!--</div>-->
+<!--</div>-->
+</div>
+
+{% endblock %}

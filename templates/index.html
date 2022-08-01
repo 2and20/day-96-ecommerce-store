@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+
+{% block content %}
+
+
+<div class="container-fluid">
+    <div class="row title-container justify-content-center align-items-center bg-light h1">Welcome to Silver Strength</div>
+<form action="/cart" method="POST">
+    <div class="row my-items-container align-items-center">
+        <div class="col-sm-4 text-center p-10"><div class="p-3 border bg-light">
+            <img class="thumbnail" src="./static/images/10kg_silver_dumbbells.jpg">
+            <input type="submit" class="btn btn-primary m-2" name="dumb" value="Add to Cart">
+        </div></div>
+        <div class="col-sm-4 text-center p-10"><div class="p-3 border bg-light">
+            <img class="thumbnail" src="./static/images/20kg_silver_kettlebell.jpg">
+            <input type="submit" class="btn btn-primary m-2" name="kettle" value="Add to Cart">
+        </div></div>
+        <div class="col-sm-4 text-center  p-10">
+            <div class="p-3 border bg-light">
+                <img class="thumbnail" src="./static/images/silver_skipping_rope.jpg">
+            <div>
+                <input type="submit" class="btn btn-primary m-2" name="rope" value="Add to Cart">
+            </div>
+                    </div>
+        </div>
+    </div>
+    </form>
+</div>
+
+
+{% endblock %}

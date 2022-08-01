@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Cart{% endblock %}
+
+
+{% block content %}
+<h1>Your Items:</h1>
+
+<form action="/cart" method="POST">
+<div class="table">
+    <div class="row">
+            <div class="col-sm-2">
+            Item
+            </div>
+            <div class="col-sm-2">
+            Quantity
+            </div>
+            <div class="col-sm-2">
+            Delete
+            </div>
+    </div>
+    {% for line in purchases %}
+    <div class="row">
+        <div class="col-sm-2">
+            {{ line.item }}
+        </div>
+        <div class="col-sm-2">
+            {{ line.num_items }}
+        </div>
+        <div class="col-sm-2">
+            <input type="submit" class="btn btn-primary" name="{{line.item}}" value="Delete Item">
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+</form>

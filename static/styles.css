@@ -1,0 +1,35 @@
+body {
+/* background-image:linear-gradient(#FFDCAE,#CED89E); */
+    background-color:#CED89E;
+    margin-left: 20px;
+}
+
+nav {
+    margin-top: 15px;
+    margin-bottom:0px;
+    text-align:right;
+}
+
+nav a {
+            color: #d64161;
+            font-size: 1.2em;
+            margin-right: 20px;
+            text-decoration: none;
+        }
+
+.title-container {
+    background-color:bisque;
+    height:100px;
+}
+
+
+.my-items-container {
+    background-color:bisque;
+    height:300px;
+}
+
+.thumbnail {
+    width:200px;
+    height=200px;
+    border:solid 1px;
+}
