@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Cancelled{% endblock %}
+
+
+{% block content %}
+<h1>Oh No, Something Went Wrong!</h1>
+<h2>Your Order Wasn't Processed - Try again or keep browsing</h2>
+
+<div class="table">
+    <div class="row">
+            <div class="col-sm-2">
+            Item
+            </div>
+            <div class="col-sm-2">
+            Quantity
+            </div>
+    </div>
+    {% for line in purchases %}
+    <div class="row">
+        <div class="col-sm-2">
+            {{ line.item }}
+        </div>
+        <div class="col-sm-2">
+            {{ line.num_items }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

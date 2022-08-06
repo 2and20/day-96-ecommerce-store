@@ -8,10 +8,19 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from forms import LoginForm, RegisterForm
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import stripe
+import os
+import smtplib
+from flask_mail import Mail, Message
+import pprint
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'hanu511'
+app.config['SECRET_KEY'] = os.environ["SECRET_KEY"]
+# app.config.from_pyfile('config.py')
+
+# app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+
+
 Bootstrap(app)
 user_list = []
 
@@ -22,6 +31,36 @@ login_manager = LoginManager(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop-data.db'
 db = SQLAlchemy(app)
+# stripe publishable key = 'pk_test_51LRzYfLZ6eSqh5K0hTxEB5dkUEnethTKOYWOOTzOraYeRLTm8W6iKElQb8OdLVUwgzJ08B7KEu5bdsOsItrk8TIC00fjH3PjX6'
+# stripe.api_key = "sk_test_51LRzYfLZ6eSqh5K0DeRnCpsV3A0wSYIkdXR6REAcCXTiCLLymdXZRt9uECm20ua8bO808AoDuCMzp3r0lQHXO3cZ00rbqOPCFV"
+BASE_URL = 'https://api.stripe.com'
+
+# stripe_keys = {"stripe_secret_key":os.environ["STRIPE_SECRET_KEY"],
+#                "stripe_pub_key":os.environ["STRIPE_PUB_KEY"]}
+#### live keys above, test keys below
+stripe_keys = {"stripe_secret_key":os.environ["STRIPE_TEST_SECRET_KEY"],
+               "stripe_pub_key":os.environ["STRIPE_TEST_PUB_KEY"]}
+stripe.api_key = stripe_keys["stripe_secret_key"]
+# YOUR_DOMAIN = "https://silverstrength.herokuapp.com"
+YOUR_DOMAIN = "http://127.0.0.1:5000"
+
+# TEST CARDS TO USE ON STRIPE
+# Payment succeeds
+# 4242 4242 4242 4242
+# Payment requires authentication
+# 4000 0025 0000 3155
+# Payment is declined
+# 4000 0000 0000 9995
+
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = os.environ["SENDER_EMAIL"]
+app.config['MAIL_PASSWORD'] = os.environ['GMAIL_APP_PASSWORD']
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
 
 
 class User(UserMixin, db.Model):
@@ -47,6 +86,7 @@ class Cart(db.Model):
     item = db.Column(db.String)
     num_items = db.Column(db.Integer)
     user_id = db.Column(db.Integer)
+
 
 db.create_all()
 
@@ -179,6 +219,121 @@ def logging_out():
     # return redirect(url_for('homepage'))
 
 
+
+@app.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    purchases= Cart.query.filter_by(user_id=current_user.id).all()
+    line_items = []
+    for order in purchases:
+        order_dets = {
+            'price_data': {
+                'currency': 'gbp',
+                'product_data': {
+                    'name': order.item,
+                },
+                'unit_amount': 2000,
+            },
+            'quantity': order.num_items,
+        }
+        line_items.append(order_dets)
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items = line_items,
+            mode='payment',
+            success_url= YOUR_DOMAIN + '/success?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url= YOUR_DOMAIN + '/cancel?session_id={CHECKOUT_SESSION_ID}',
+        )
+
+        # http://127.0.0.1:5000
+        # 'price': '{{PRICE_ID}}',
+    except Exception as e:
+        return str(e)
+
+    return redirect(checkout_session.url, code=303)
+
+
+
+@app.route('/success', methods=['GET'])
+def success():
+    try:
+        session = stripe.checkout.Session.retrieve(request.args.get('session_id'))
+        customer = stripe.Customer.retrieve(session.customer)
+        if session.status != "complete":
+            return redirect(url_for("order_cart"))
+    except:
+        return redirect(url_for("order_cart"))
+    print(f"session: {session}")
+    print(f"\n\n\ncustomer: {customer}")
+    print(f"\ncustomer.name: {customer.name}")
+    print(f"\n\nsession.status: {session.status}")
+    purchases = Cart.query.filter_by(user_id=current_user.id).all()
+    buyer = User.query.filter_by(id=current_user.id).first()
+    # so...if session.status == complete, display the order and
+    # shipping address, then empty the cart
+    final_orders = []
+    for purchase in purchases:
+        # this lets me put the number of items into success.html,
+        # whilst deleting from the cart since they've been
+        # purchased
+        email_body = f"{purchase.num_items}x {purchase.item}\n\n"
+        final_order=purchase
+        final_orders.append(final_order)
+        db.session.delete(purchase)
+    db.session.commit()
+
+    sender_email = os.environ["SENDER_EMAIL"]
+    sender_password = os.environ["SENDER_PASSWORD"]
+
+    #start with "Subject:Hello this is the subject line\n\nThis is then the body"
+    send_message = f"Hi {buyer.firstname}, your order is:\n\n{email_body}We'll" \
+                   f" have it out to you ASAP!\n\nKind Regards, SilverStrength"
+    send_to_email = buyer.username # change to user once tested
+    msg = Message("Thank you for your order from SilverStrength",
+                  sender = sender_email,
+                  recipients = [send_to_email, sender_email])
+    msg.body = send_message
+    mail.send(msg)
+
+    return render_template("success.html", purchases=final_orders, buyer=buyer)
+
+@app.route('/cancel', methods=['GET'])
+def cancel():
+    try:
+        session = stripe.checkout.Session.retrieve(request.args.get('session_id'))
+        if session.status != "complete":
+            return redirect(url_for("order_cart"))
+    except:
+        return redirect(url_for("order_cart"))
+    purchases= Cart.query.filter_by(user_id=current_user.id).all()
+    return render_template("cancel.html", purchases=purchases)
+
+# @app.route('/callback', methods=['POST'])
+# def callback():
+#     payload = request.data
+#     sig_header = request.headers.get('Stripe-Signature')
+#     event = None
+#     endpoint_secret = 'whsec_XXX' # put Signing Secret here
+#     try:
+#         event = stripe.Webhook.construct_event(
+#         payload, sig_header, endpoint_secret
+#         )
+#     except stripe.error.SignatureVerificationError as e:
+#         print(e)
+#         abort(400)
+#
+#     # Handle the checkout.session.completed event
+#     if event['type'] == 'checkout.session.completed':
+#         session = event['data']['object']
+#         print(session)
+#         # save somewhere in database
+#         # that this session is completed
+#     return 'ok'
+
+
+@app.route('/admin')
+def admin():
+    all_items = 1
+    return render_template('admin.html', all_items=all_items)
 
 if __name__ == '__main__':
     app.run(debug=True)

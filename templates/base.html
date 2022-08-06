@@ -10,6 +10,11 @@
 </head>
 <body>
 <nav>
+    <a class="navbar-brand rounded">
+        <img src="./static/images/biceps1.jpg" width="45" alt="" class="d-inline-block align-left mr-2">
+      <!-- Logo Text -->
+      <span class="text-uppercase font-weight-bold"></span>
+    </a>
     <a href="{{url_for('homepage')}}">Home</a>
     {# if not logged_in #}
 
@@ -23,7 +28,9 @@
 
 
     <a href="#">About</a>
-
+    {% if current_user.id == 1 %}
+    <a href="{{url_for('admin')}}">Admin</a>
+    {% endif %}
 </nav>
 <hr>
 

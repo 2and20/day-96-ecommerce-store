@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Success!{% endblock %}
+
+
+{% block content %}
+<h1>Thank You For Your Order</h1>
+
+<div class="table">
+    <div class="row">
+            <div class="col-sm-2">
+            Item
+            </div>
+            <div class="col-sm-2">
+            Quantity
+            </div>
+    </div>
+    {% for line in purchases %}
+    <div class="row">
+        <div class="col-sm-2">
+            {{ line.item }}
+        </div>
+        <div class="col-sm-2">
+            {{ line.num_items }}
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+<div class="table">
+    <div class="row">Delivery details:</div>
+    <div class="row">{{buyer.firstname}} {{buyer.lastname}}</div>
+    <div class="row">{{buyer.address1}}</div>
+    <div class="row">{{buyer.address2}}</div>
+    <div class="row">{{buyer.city}}</div>
+    <div class="row">{{buyer.postcode}}</div>
+</div>
+
+{% endblock %}
