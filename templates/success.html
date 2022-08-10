@@ -4,36 +4,63 @@
 
 
 {% block content %}
-<h1>Thank You For Your Order</h1>
 
-<div class="table">
-    <div class="row">
-            <div class="col-sm-2">
-            Item
-            </div>
-            <div class="col-sm-2">
-            Quantity
-            </div>
-    </div>
+
+<h1>Thank You For Your Order!</h1>
+
+<div class="row">
+    <div class="col-7">
+        <div class="table-responsive">
+<form action="/cart" method="POST">
+<table class="table table-bordered table-hover">
+    <thead class="table-secondary">
+     <tr>
+         <th scope="col">Item</th>
+         <th scope="col">Description</th>
+         <th scope="col">Price</th>
+         <th scope="col">Quantity</th>
+     </tr>
+    </thead>
+    <tbody>
+    {% for thing in all_items %}
     {% for line in purchases %}
-    <div class="row">
-        <div class="col-sm-2">
-            {{ line.item }}
-        </div>
-        <div class="col-sm-2">
-            {{ line.num_items }}
-        </div>
-    </div>
+    {% if line.item == thing.item_id|string %}
+    <tr>
+        <td><img src="{{ thing.item_image }}" width=200px height="auto"></td>
+        <td>{{ thing.item_desc }}</td>
+        <td>{{ thing.item_px }}</td>
+        <td>{{ line.num_items }}</td>
+    </tr>
+    {% endif %}
     {% endfor %}
-
+    {% endfor %}
+    </tbody>
+</table>
+</form>
 </div>
+    </div>
+
+    <div class="col-1"></div>
+
+<div class="col-3">
 <div class="table">
-    <div class="row">Delivery details:</div>
-    <div class="row">{{buyer.firstname}} {{buyer.lastname}}</div>
-    <div class="row">{{buyer.address1}}</div>
-    <div class="row">{{buyer.address2}}</div>
-    <div class="row">{{buyer.city}}</div>
-    <div class="row">{{buyer.postcode}}</div>
+    <div class="row"><h2>Total Paid:<span style="color:green; text-align:left">{{"£%.2f"|format(checkout_price)}}</span></h2></div>
+    <hr>
+    <div class="row"><h4>Delivery details:</h4></div>
+    <p></p>
+    <div class="row"><h6>{{buyer.firstname}} {{buyer.lastname}}</h6></div>
+    <div class="row"><h6>{{buyer.username}}</h6></div>
+    <p></p>
+    <div class="row"><h6>{{buyer.address1}}</h6></div>
+    <div class="row"><h6>{{buyer.address2}}</h6></div>
+    <div class="row"><h6>{{buyer.city}}</h6></div>
+    <div class="row"><h6>{{buyer.postcode}}</h6></div>
+    <p></p>
+    <h5><span style="color:red">Your JPEGs have been emailed to you, don't forget to right-click > Save  :)</span></h5>
+    <p></p>
+    <h5><span style="color:red">We hope you enjoy them</span></h5>
+</div>
+</div>
 </div>
 
 {% endblock %}

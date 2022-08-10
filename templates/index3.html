@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+
+{% block content %}
+
+<form action="/cart" method="POST">
+    <div class="row">
+        {% for item in all_items %}
+        <div class="col-md-3 col-xs-12">
+            <img style="width:200px;" src="{{item.item_image}}">
+            <h6>{{item.item_desc}}</h6>
+            <h2>{{"£%.2f"|format(item.item_px)}}</h2>
+            <input type="submit" class="btn btn-primary" name="{{item.item_id}}" value="Add to Cart">
+            <p></p>
+            <hr>
+            <p></p>
+        </div>
+        {% endfor %}
+    </div>
+</form>
+
+
+
+
+{% endblock %}

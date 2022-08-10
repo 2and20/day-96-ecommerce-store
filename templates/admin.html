@@ -1,31 +1,34 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}Cart{% endblock %}
+{% block title %}Admin{% endblock %}
 
 
 {% block content %}
-<h1>Administrator Page</h1>
+<h1 style="text-align:center; color:red">Administrator Page</h1>
 
+<hr>
 <div class="row">
     <div class="col-6">
+        <h3 style="text-align:center;">Current Listed Items</h3>
         <div class="table-responsive">
-<form action="/cart" method="POST">
+<form action="/admin" method="POST">
 <table class="table table-bordered table-hover">
-    <thead class="table-secondary">
-     <tr>
-        <th scope="col">Item</th>
-        <th scope="col">Quantity</th>
-        <th scope="col"></th>
+    <thead class="table-success">
+     <tr class="text-center">
+        <th width="40%">Item Image</th>
+         <th width="40%">Item Name</th>
+        <th  width="30%">Price</th>
+         <th width="20%">Delete</th>
      </tr>
     </thead>
     <tbody>
-    {% for line in purchases %}
+    {% for thing in all_items %}
     <tr>
-     <td>{{ line.item }}</td>
-             <td>{{ line.num_items }}</td>
-        <td><input type="submit" class="btn btn-danger" name="{{line.item}}" value="Delete Item">
-
-        </td>
+     <td><img src="{{thing.item_image }}" width=200px height="auto"></td>
+     <td>{{ thing.item_name }}</td>
+     <td>{{ thing.item_px }}</td>
+        <td><input type="submit" class="btn btn-danger" name="{{thing.item_id}}" value="Delete Item"></td>
     </tr>
     {% endfor %}
     </tbody>
@@ -33,13 +36,18 @@
 </form>
 </div>
     </div>
+
+    <div class="col">
+    </div>
+    <div class="col-5">
+        <h3 style="text-align:center;">Add New Item To Database</h3>
+        {{ wtf.quick_form(form, novalidate=True,  button_map={'submit':'primary'}) }}
+    </div>
 </div>
 
 
 
-<form action="{{url_for('create_checkout_session')}}" method="POST">
-<input type="submit" class="btn btn-primary" value="Buy Now!">
-</form>
+
 
 
 {% endblock %}

@@ -6,7 +6,7 @@ from flask_login import LoginManager, UserMixin, login_user, \
 # from flask_login import login_required,
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
-from forms import LoginForm, RegisterForm
+from forms import LoginForm, RegisterForm, ItemForm
 from werkzeug.security import generate_password_hash, check_password_hash
 import stripe
 import os
@@ -66,7 +66,7 @@ mail = Mail(app)
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, nullable=True, primary_key=True)
-    username = db.Column(db.String)
+    username = db.Column(db.String) # email
     password = db.Column(db.String)
     firstname = db.Column(db.String)
     lastname = db.Column(db.String)
@@ -75,10 +75,10 @@ class User(UserMixin, db.Model):
     city = db.Column(db.String)
     postcode = db.Column(db.String)
 
-class User2(db.Model):
-    __tablename__ = 'users2'
-    id = db.Column(db.Integer, nullable=True, primary_key=True)
-    food = db.Column(db.String)
+# class User2(db.Model):
+#     __tablename__ = 'users2'
+#     id = db.Column(db.Integer, nullable=True, primary_key=True)
+#     food = db.Column(db.String)
 
 class Cart(db.Model):
     __tablename__ = 'cart'
@@ -87,12 +87,26 @@ class Cart(db.Model):
     num_items = db.Column(db.Integer)
     user_id = db.Column(db.Integer)
 
+class Items(db.Model):
+    __tablename__ = 'items'
+    item_id = db.Column(db.Integer, nullable=True, primary_key=True)
+    item_name = db.Column(db.String)
+    item_image = db.Column(db.String)
+    item_desc = db.Column(db.String)
+    item_px = db.Column(db.Float)
+
+# Cart.item is a string, is same as Items.item_id tho that's an integer
 
 db.create_all()
 
-new_user2 = User2(food="pasta")
-db.session.add(new_user2)
 db.session.commit()
+
+# item = Items(item_name="#9590",
+#              item_image="https://img.seadn.io/files/ac380a556035c340e2c354d940c4f918.png?auto=format&fit=max&w=384",
+#              item_desc="CryptoPunk #9590",
+#              item_px=1.15)
+# db.session.create(item)
+# db.session.commit()
 
 # to_del = Cart.query.get(5)
 # db.session.delete(to_del)
@@ -104,11 +118,23 @@ def load_user(user_id):
     # return User.query.get(id)
     return User.query.get(user_id)
 
+def total_price():
+    cart_stuff = Cart.query.all()
+    all_items = Items.query.all()
+    total_price = 0
+    for thing in all_items:
+        for to_buy in cart_stuff:
+            print(f"to buy.id {to_buy.item}, thing.item_id {thing.item_id}")
+            if str(to_buy.item) == str(thing.item_id):
+                print(f"total price is {total_price}")
+                total_price += thing.item_px * to_buy.num_items
+    return total_price
 
 @app.route('/')
 def homepage():
     print(current_user)
-    return render_template("index.html", user=current_user)
+    all_items = Items.query.all()
+    return render_template("index3.html", user=current_user, all_items=all_items)
 
 
 
@@ -119,7 +145,7 @@ def login():
         username = form.username.data
         password = form.password.data
         user = User.query.filter_by(username=username).first()
-        print(f"user is {user}, user.id is type: {type(user.id)}")
+        # print(f"user is {user}, user.id is type: {type(user.id)}")
         if user == None:
             pass
             flash("Email not found, please Register")
@@ -209,7 +235,9 @@ def order_cart():
         # user = db.Column(db.Integer)
         # return "OK that's added!"
     purchases= Cart.query.filter_by(user_id=current_user.id).all()
-    return render_template("cart.html", purchases=purchases)
+    all_items = Items.query.all()
+    checkout_price = total_price()
+    return render_template("cart.html", purchases=purchases, all_items=all_items, checkout_price=checkout_price)
 
 @app.route('/logout')
 @login_required
@@ -218,22 +246,22 @@ def logging_out():
     return render_template("logout.html")
     # return redirect(url_for('homepage'))
 
-
-
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     purchases= Cart.query.filter_by(user_id=current_user.id).all()
     line_items = []
-    for order in purchases:
+    for custy_order in purchases:
+        item_desc_ = Items.query.filter_by(item_id=int(custy_order.item)).first().item_desc
+        item_px_ = int(100*Items.query.filter_by(item_id=int(custy_order.item)).first().item_px)
         order_dets = {
             'price_data': {
                 'currency': 'gbp',
                 'product_data': {
-                    'name': order.item,
+                    'name': item_desc_,
                 },
-                'unit_amount': 2000,
+                'unit_amount': item_px_,
             },
-            'quantity': order.num_items,
+            'quantity': custy_order.num_items,
         }
         line_items.append(order_dets)
     try:
@@ -251,8 +279,6 @@ def create_checkout_session():
 
     return redirect(checkout_session.url, code=303)
 
-
-
 @app.route('/success', methods=['GET'])
 def success():
     try:
@@ -267,10 +293,14 @@ def success():
     print(f"\ncustomer.name: {customer.name}")
     print(f"\n\nsession.status: {session.status}")
     purchases = Cart.query.filter_by(user_id=current_user.id).all()
+    all_items = Items.query.all()
     buyer = User.query.filter_by(id=current_user.id).first()
+    checkout_price = total_price()
     # so...if session.status == complete, display the order and
     # shipping address, then empty the cart
     final_orders = []
+    if purchases == []: # catches cassse where user refreshes page
+        email_body = ""
     for purchase in purchases:
         # this lets me put the number of items into success.html,
         # whilst deleting from the cart since they've been
@@ -287,14 +317,16 @@ def success():
     #start with "Subject:Hello this is the subject line\n\nThis is then the body"
     send_message = f"Hi {buyer.firstname}, your order is:\n\n{email_body}We'll" \
                    f" have it out to you ASAP!\n\nKind Regards, SilverStrength"
-    send_to_email = buyer.username # change to user once tested
+    send_to_email = buyer.username
     msg = Message("Thank you for your order from SilverStrength",
                   sender = sender_email,
                   recipients = [send_to_email, sender_email])
     msg.body = send_message
-    mail.send(msg)
+    if purchases != []:  # catches cassse where user refreshes page
+        mail.send(msg)
 
-    return render_template("success.html", purchases=final_orders, buyer=buyer)
+    return render_template("success.html", purchases=final_orders, buyer=buyer,
+                           all_items=all_items, checkout_price=checkout_price)
 
 @app.route('/cancel', methods=['GET'])
 def cancel():
@@ -307,33 +339,46 @@ def cancel():
     purchases= Cart.query.filter_by(user_id=current_user.id).all()
     return render_template("cancel.html", purchases=purchases)
 
-# @app.route('/callback', methods=['POST'])
-# def callback():
-#     payload = request.data
-#     sig_header = request.headers.get('Stripe-Signature')
-#     event = None
-#     endpoint_secret = 'whsec_XXX' # put Signing Secret here
-#     try:
-#         event = stripe.Webhook.construct_event(
-#         payload, sig_header, endpoint_secret
-#         )
-#     except stripe.error.SignatureVerificationError as e:
-#         print(e)
-#         abort(400)
-#
-#     # Handle the checkout.session.completed event
-#     if event['type'] == 'checkout.session.completed':
-#         session = event['data']['object']
-#         print(session)
-#         # save somewhere in database
-#         # that this session is completed
-#     return 'ok'
-
-
-@app.route('/admin')
+@app.route('/admin', methods=['GET','POST'])
 def admin():
-    all_items = 1
-    return render_template('admin.html', all_items=all_items)
+    form = ItemForm()
+    print(f"request.method is {request.method}")
+
+    try: # checks that user is id=1, ie. admin
+        if current_user.id != 1:
+            return redirect(url_for('homepage'))
+    except:
+        return redirect(url_for('homepage'))
+
+    if form.validate_on_submit():
+        print("got here")
+        new_item = Items(item_name=form.item_name.data,
+                        item_image=form.item_image.data,
+                        item_desc=form.item_desc.data,
+                        item_px=form.item_price.data)
+        db.session.add(new_item)
+        db.session.commit()
+        return redirect(url_for('admin'))
+
+    if request.method=="POST":
+        try:
+            item_to_delete = int(list(request.form.to_dict().keys())[0])
+            print(f"item to delete {item_to_delete}, type {type(item_to_delete)}")
+            del_this_object = Items.query.filter_by(item_id = item_to_delete).first()
+            print(del_this_object)
+            db.session.delete(del_this_object)
+            db.session.commit()
+        except:
+            pass
+        return redirect(url_for('admin'))
+        # print(f"a {(request.form.to_dict().keys())}")
+        # if list(request.form.to_dict().values())[0] == "additem":
+
+    all_items = Items.query.all()
+    print(f"all_items: {all_items}")
+
+    return render_template('admin.html', all_items=all_items, form=form)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

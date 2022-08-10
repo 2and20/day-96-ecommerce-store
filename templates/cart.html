@@ -4,42 +4,65 @@
 
 
 {% block content %}
+
+{% if checkout_price == 0 %}
+
+<h1>Your Cart is Empty</h1>
+
+{% else %}
+
 <h1>Your Items:</h1>
 
 <div class="row">
-    <div class="col-6">
+    <div class="col-9">
         <div class="table-responsive">
 <form action="/cart" method="POST">
 <table class="table table-bordered table-hover">
     <thead class="table-secondary">
      <tr>
-        <th scope="col">Item</th>
-        <th scope="col">Quantity</th>
-        <th scope="col"></th>
+         <th scope="col">Item</th>
+         <th scope="col">Description</th>
+         <th scope="col">Price</th>
+         <th scope="col">Quantity</th>
+         <th scope="col"></th>
      </tr>
     </thead>
     <tbody>
+    {% for thing in all_items %}
     {% for line in purchases %}
+    {% if line.item == thing.item_id|string %}
     <tr>
-     <td>{{ line.item }}</td>
-             <td>{{ line.num_items }}</td>
+        <td><img src="{{ thing.item_image }}" width=200px height="auto"></td>
+        <td>{{ thing.item_desc }}</td>
+        <td>{{ thing.item_px }}</td>
+        <td>{{ line.num_items }}</td>
         <td><input type="submit" class="btn btn-danger" name="{{line.item}}" value="Delete Item">
-
         </td>
     </tr>
+    {% endif %}
+    {% endfor %}
     {% endfor %}
     </tbody>
 </table>
 </form>
+
+
+
 </div>
     </div>
+<!--                <div class="col-1"></div>-->
+<div class="col-3">
+<form action="{{url_for('create_checkout_session')}}" method="POST">
+<h2>Your total price is:</h2>
+    <h1><span style="color:green">{{"£%.2f"|format(checkout_price)}}</span></h1>
+<input type="submit" class="btn btn-primary btn-lg" value="Buy Now!">
+</form>
+</div>
 </div>
 
+{% endif %}
 
 
-<form action="{{url_for('create_checkout_session')}}" method="POST">
-<input type="submit" class="btn btn-primary" value="Buy Now!">
-</form>
 
 
 {% endblock %}
