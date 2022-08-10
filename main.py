@@ -29,7 +29,8 @@ login_manager = LoginManager(app)
 # login_manager.init_app(app)
 # from app import login
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop-data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
+    # 'sqlite:///shop-data.db'
 db = SQLAlchemy(app)
 # stripe publishable key = 'pk_test_51LRzYfLZ6eSqh5K0hTxEB5dkUEnethTKOYWOOTzOraYeRLTm8W6iKElQb8OdLVUwgzJ08B7KEu5bdsOsItrk8TIC00fjH3PjX6'
 # stripe.api_key = "sk_test_51LRzYfLZ6eSqh5K0DeRnCpsV3A0wSYIkdXR6REAcCXTiCLLymdXZRt9uECm20ua8bO808AoDuCMzp3r0lQHXO3cZ00rbqOPCFV"
@@ -41,8 +42,11 @@ BASE_URL = 'https://api.stripe.com'
 stripe_keys = {"stripe_secret_key":os.environ["STRIPE_TEST_SECRET_KEY"],
                "stripe_pub_key":os.environ["STRIPE_TEST_PUB_KEY"]}
 stripe.api_key = stripe_keys["stripe_secret_key"]
+
+# this part is just to redirect after stripe to /success or /cancel
 # YOUR_DOMAIN = "https://silverstrength.herokuapp.com"
-YOUR_DOMAIN = "http://127.0.0.1:5000"
+# YOUR_DOMAIN = "http://127.0.0.1:5000"
+YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
 
 # TEST CARDS TO USE ON STRIPE
 # Payment succeeds
@@ -315,16 +319,16 @@ def success():
     sender_password = os.environ["SENDER_PASSWORD"]
 
     #start with "Subject:Hello this is the subject line\n\nThis is then the body"
-    send_message = f"Hi {buyer.firstname},<br><br>Your order is:<br><br>{email_body}<br><br><br>We" \
-                   f" hope you enjoy them!<br><br>Don't forget to RightClickSave!<br><br>Kind Regards, RightClickSave"
+    send_message = f"Hi {buyer.firstname},<br><br>Your order is:<br><br>{email_body}<br><br><br>Enjoy" \
+                   f"!<br><br>Don't forget to RightClickSave!"
     send_to_email = buyer.username
     msg = Message("Thank you for your order from RightClickSave",
                   sender = sender_email,
-                  recipients = send_to_email,
+                  recipients = [send_to_email],
                   bcc = sender_email,
                   html = send_message)
     # msg.body = send_message
-    if purchases != []:  # catches cassse where user refreshes page
+    if purchases != []:  # catches case where user refreshes page
         mail.send(msg)
 
     return render_template("success.html", purchases=final_orders, buyer=buyer,
