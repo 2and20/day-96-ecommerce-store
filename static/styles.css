@@ -47,3 +47,10 @@ nav a {
     border:solid 1px;
     padding-right:20px;
 }
+
+.my-nav-icon-text {
+font-weight:bold;
+padding-left:20px;
+padding-right:20px;
+color:white;
+}

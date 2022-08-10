@@ -299,13 +299,13 @@ def success():
     # so...if session.status == complete, display the order and
     # shipping address, then empty the cart
     final_orders = []
-    if purchases == []: # catches cassse where user refreshes page
-        email_body = ""
+    email_body = ""
     for purchase in purchases:
         # this lets me put the number of items into success.html,
         # whilst deleting from the cart since they've been
         # purchased
-        email_body = f"{purchase.num_items}x {purchase.item}\n\n"
+        this_item = Items.query.filter_by(item_id=int(purchase.item)).first()
+        email_body += f"<img src='{this_item.item_image}'><br>{this_item.item_image}<br><br>"
         final_order=purchase
         final_orders.append(final_order)
         db.session.delete(purchase)
@@ -315,13 +315,15 @@ def success():
     sender_password = os.environ["SENDER_PASSWORD"]
 
     #start with "Subject:Hello this is the subject line\n\nThis is then the body"
-    send_message = f"Hi {buyer.firstname}, your order is:\n\n{email_body}We'll" \
-                   f" have it out to you ASAP!\n\nKind Regards, SilverStrength"
+    send_message = f"Hi {buyer.firstname},<br><br>Your order is:<br><br>{email_body}<br><br><br>We" \
+                   f" hope you enjoy them!<br><br>Don't forget to RightClickSave!<br><br>Kind Regards, RightClickSave"
     send_to_email = buyer.username
-    msg = Message("Thank you for your order from SilverStrength",
+    msg = Message("Thank you for your order from RightClickSave",
                   sender = sender_email,
-                  recipients = [send_to_email, sender_email])
-    msg.body = send_message
+                  recipients = send_to_email,
+                  bcc = sender_email,
+                  html = send_message)
+    # msg.body = send_message
     if purchases != []:  # catches cassse where user refreshes page
         mail.send(msg)
 
@@ -378,6 +380,10 @@ def admin():
     print(f"all_items: {all_items}")
 
     return render_template('admin.html', all_items=all_items, form=form)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
 if __name__ == '__main__':
