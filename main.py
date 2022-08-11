@@ -34,10 +34,11 @@ login_manager = LoginManager(app)
 # YOUR_DOMAIN = "http://127.0.0.1:5000"
 YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
 
-if YOUR_DOMAIN == 'https://rightclicksave.herokuapp.com':
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
+#couldnt get this if-else to work in heroku without crashing
+# if YOUR_DOMAIN == 'https://rightclicksave.herokuapp.com':
+#     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
+# else:
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
     # 'sqlite:///shop-data.db'
 db = SQLAlchemy(app)
 # stripe publishable key = 'pk_test_51LRzYfLZ6eSqh5K0hTxEB5dkUEnethTKOYWOOTzOraYeRLTm8W6iKElQb8OdLVUwgzJ08B7KEu5bdsOsItrk8TIC00fjH3PjX6'
