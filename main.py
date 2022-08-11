@@ -325,7 +325,7 @@ def success():
     msg = Message("Thank you for your order from RightClickSave",
                   sender = sender_email,
                   recipients = [send_to_email],
-                  bcc = sender_email,
+                  bcc = [sender_email],
                   html = send_message)
     # msg.body = send_message
     if purchases != []:  # catches case where user refreshes page
