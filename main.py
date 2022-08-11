@@ -112,9 +112,10 @@ db.session.commit()
 # db.session.create(item)
 # db.session.commit()
 
-# to_del = Cart.query.get(5)
+# to_del = User.query.get(1)
 # db.session.delete(to_del)
 # db.session.commit()
+
 @login_manager.user_loader
 def load_user(user_id):
     if user_id is None:
