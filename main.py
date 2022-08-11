@@ -36,11 +36,11 @@ db = SQLAlchemy(app)
 # stripe.api_key = "sk_test_51LRzYfLZ6eSqh5K0DeRnCpsV3A0wSYIkdXR6REAcCXTiCLLymdXZRt9uECm20ua8bO808AoDuCMzp3r0lQHXO3cZ00rbqOPCFV"
 BASE_URL = 'https://api.stripe.com'
 
-# stripe_keys = {"stripe_secret_key":os.environ["STRIPE_SECRET_KEY"],
-#                "stripe_pub_key":os.environ["STRIPE_PUB_KEY"]}
+stripe_keys = {"stripe_secret_key":os.environ["STRIPE_SECRET_KEY"],
+               "stripe_pub_key":os.environ["STRIPE_PUB_KEY"]}
 #### live keys above, test keys below
-stripe_keys = {"stripe_secret_key":os.environ["STRIPE_TEST_SECRET_KEY"],
-               "stripe_pub_key":os.environ["STRIPE_TEST_PUB_KEY"]}
+# stripe_keys = {"stripe_secret_key":os.environ["STRIPE_TEST_SECRET_KEY"],
+#                "stripe_pub_key":os.environ["STRIPE_TEST_PUB_KEY"]}
 stripe.api_key = stripe_keys["stripe_secret_key"]
 
 # this part is just to redirect after stripe to /success or /cancel
@@ -136,6 +136,7 @@ def total_price():
 
 @app.route('/')
 def homepage():
+    print(os.environ["STRIPE_SECRET_KEY"])
     print(current_user)
     all_items = Items.query.all()
     return render_template("index3.html", user=current_user, all_items=all_items)
@@ -319,7 +320,7 @@ def success():
     sender_password = os.environ["SENDER_PASSWORD"]
 
     #start with "Subject:Hello this is the subject line\n\nThis is then the body"
-    send_message = f"Hi {buyer.firstname},<br><br>Your order is:<br><br>{email_body}<br><br><br>Enjoy" \
+    send_message = f"Hi {buyer.firstname},<br><br>Your order is:<br><br>{email_body}<br><br>Enjoy" \
                    f"!<br><br>Don't forget to RightClickSave!"
     send_to_email = buyer.username
     msg = Message("Thank you for your order from RightClickSave",
