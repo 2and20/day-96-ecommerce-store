@@ -29,24 +29,29 @@ login_manager = LoginManager(app)
 # login_manager.init_app(app)
 # from app import login
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
+# this part is just to redirect after stripe to /success or /cancel
+# YOUR_DOMAIN = "https://rightclicksave.herokuapp.com"
+# YOUR_DOMAIN = "http://127.0.0.1:5000"
+YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
+
+if YOUR_DOMAIN == 'https://rightclicksave.herokuapp.com':
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
     # 'sqlite:///shop-data.db'
 db = SQLAlchemy(app)
 # stripe publishable key = 'pk_test_51LRzYfLZ6eSqh5K0hTxEB5dkUEnethTKOYWOOTzOraYeRLTm8W6iKElQb8OdLVUwgzJ08B7KEu5bdsOsItrk8TIC00fjH3PjX6'
 # stripe.api_key = "sk_test_51LRzYfLZ6eSqh5K0DeRnCpsV3A0wSYIkdXR6REAcCXTiCLLymdXZRt9uECm20ua8bO808AoDuCMzp3r0lQHXO3cZ00rbqOPCFV"
 BASE_URL = 'https://api.stripe.com'
 
-stripe_keys = {"stripe_secret_key":os.environ["STRIPE_SECRET_KEY"],
-               "stripe_pub_key":os.environ["STRIPE_PUB_KEY"]}
+# stripe_keys = {"stripe_secret_key":os.environ["STRIPE_SECRET_KEY"],
+#                "stripe_pub_key":os.environ["STRIPE_PUB_KEY"]}
 #### live keys above, test keys below
-# stripe_keys = {"stripe_secret_key":os.environ["STRIPE_TEST_SECRET_KEY"],
-#                "stripe_pub_key":os.environ["STRIPE_TEST_PUB_KEY"]}
+stripe_keys = {"stripe_secret_key":os.environ["STRIPE_TEST_SECRET_KEY"],
+               "stripe_pub_key":os.environ["STRIPE_TEST_PUB_KEY"]}
 stripe.api_key = stripe_keys["stripe_secret_key"]
 
-# this part is just to redirect after stripe to /success or /cancel
-# YOUR_DOMAIN = "https://silverstrength.herokuapp.com"
-# YOUR_DOMAIN = "http://127.0.0.1:5000"
-YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
+
 
 # TEST CARDS TO USE ON STRIPE
 # Payment succeeds
