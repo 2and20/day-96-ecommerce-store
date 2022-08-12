@@ -143,11 +143,9 @@ def total_price():
 
 @app.route('/')
 def homepage():
-    print(os.environ["STRIPE_SECRET_KEY"])
     print(current_user)
     all_items = Items.query.all()
     return render_template("index3.html", user=current_user, all_items=all_items)
-
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -198,11 +196,11 @@ def register():
         if User.query.filter_by(username=username).first() is None:
             db.session.add(new_user)
             db.session.commit()
-            print("dets added")
+            user = User.query.filter_by(username=username).first()
+            login_user(user)
             return redirect(url_for('homepage'))
         else:
             flash("That email is already registered, login instead?")
-            print("That email is taken")
 
     return render_template("register2.html", form=form)
 
@@ -317,7 +315,9 @@ def success():
         # whilst deleting from the cart since they've been
         # purchased
         this_item = Items.query.filter_by(item_id=int(purchase.item)).first()
-        email_body += f"<img src='{this_item.item_image}'><br>{this_item.item_image}<br><br>"
+        image_link_full = this_item.item_image.split("?")[0]
+        print(f"image link is {image_link_full}")
+        email_body += f"<img src='{this_item.item_image}'><br><a href='{image_link_full}'>Download Link</a><br><br>"
         final_order=purchase
         final_orders.append(final_order)
         db.session.delete(purchase)
