@@ -107,7 +107,7 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 def total_price():
-    cart_stuff = Cart.query.all()
+    cart_stuff = Cart.query.filter_by(user_id=current_user.id).all()
     all_items = Items.query.all()
     total_price = 0
     for thing in all_items:
@@ -209,6 +209,7 @@ def order_cart():
 @login_required
 def logging_out():
     logout_user()
+    return redirect(url_for('login'))
     return render_template("logout.html")
 
 @app.route('/create-checkout-session', methods=['POST'])
