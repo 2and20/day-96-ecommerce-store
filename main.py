@@ -27,7 +27,8 @@ YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
 # if YOUR_DOMAIN == 'https://rightclicksave.herokuapp.com':
 #     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
 # else:
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL",  os.environ["SQLALCHEMY_DATABASE_URI"])
 db = SQLAlchemy(app)
 BASE_URL = 'https://api.stripe.com'
 
