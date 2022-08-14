@@ -25,8 +25,8 @@ login_manager = LoginManager(app)
 YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
 
 # just can't get heroku to work with postgresql db
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL2",  os.environ["SQLALCHEMY_DATABASE_URI"])
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL2",  os.environ["SQLALCHEMY_DATABASE_URI"])
 
 
 db = SQLAlchemy(app)
