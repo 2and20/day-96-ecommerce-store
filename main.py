@@ -86,9 +86,9 @@ class Items(db.Model):
 
 # Cart.item is a string, is same as Items.item_id tho that's an integer
 
-db.create_all()
-
-db.session.commit()
+# trying to comment these out as someone said it crashes heroku when using postgres
+# db.create_all()
+# db.session.commit()
 
 # item = Items(item_name="#9590",
 #              item_image="https://img.seadn.io/files/ac380a556035c340e2c354d940c4f918.png?auto=format&fit=max&w=384",
