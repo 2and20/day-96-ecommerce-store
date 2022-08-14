@@ -9,6 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import stripe
 import os
 from flask_mail import Mail, Message
+import psycopg2
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ["SECRET_KEY"]
@@ -29,6 +30,10 @@ YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
 # else:
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL",  os.environ["SQLALCHEMY_DATABASE_URI"])
+print(os.environ.get("DATABASE_URL"))
+if os.environ.get("DATABASE_URL") is not None:
+    conn = psycopg2.connect(os.environ.get("DATABASE_URL"), sslmode='require')
+
 db = SQLAlchemy(app)
 BASE_URL = 'https://api.stripe.com'
 
