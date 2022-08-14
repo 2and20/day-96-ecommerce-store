@@ -24,15 +24,10 @@ login_manager = LoginManager(app)
 # different for local versus heroku hosted
 YOUR_DOMAIN = os.environ["YOUR_DOMAIN"]
 
-#couldnt get this if-else to work in heroku without crashing
-# if YOUR_DOMAIN == 'https://rightclicksave.herokuapp.com':
-#     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
-# else:
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL2",  os.environ["SQLALCHEMY_DATABASE_URI"])
-# print(os.environ.get("DATABASE_URL2"))
-# if os.environ.get("DATABASE_URL2") is not None:
-#     conn = psycopg2.connect(os.environ.get("DATABASE_URL2"), sslmode='require')
+# just can't get heroku to work with postgresql db
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["SQLALCHEMY_DATABASE_URI"]
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL2",  os.environ["SQLALCHEMY_DATABASE_URI"])
+
 
 db = SQLAlchemy(app)
 BASE_URL = 'https://api.stripe.com'
